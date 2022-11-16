@@ -21,7 +21,7 @@ class FunSetSuite extends munit.FunSuite {
    * Instead of copy-pasting the code for creating the set into every test, we can
    * store it in the test class using a val:
    *
-   *   val s1 = singletonSet(1)
+   * val s1 = singletonSet(1)
    *
    * However, what happens if the method "singletonSet" has a bug and crashes? Then
    * the test methods are not even executed, because creating an instance of the
@@ -36,6 +36,8 @@ class FunSetSuite extends munit.FunSuite {
     val s1 = singletonSet(1)
     val s2 = singletonSet(2)
     val s3 = singletonSet(3)
+    val s4 = setOf(1, 2, 3)
+    val s5 = setOf(3, 4, 5)
   }
 
   /**
@@ -45,7 +47,7 @@ class FunSetSuite extends munit.FunSuite {
    * Once you finish your implementation of "singletonSet", remove the
    * .ignore annotation.
    */
-  test("singleton set one contains one".ignore) {
+  test("singleton set one contains one") {
 
     /**
      * We create a new instance of the "TestSets" trait, this gives us access
@@ -60,6 +62,15 @@ class FunSetSuite extends munit.FunSuite {
     }
   }
 
+  test("setOf creates set containing specified element ") {
+    new TestSets {
+      assert(contains(s4, 1))
+      assert(contains(s4, 2))
+      assert(contains(s4, 3))
+    }
+  }
+
+
   test("union contains all elements of each set") {
     new TestSets {
       val s = union(s1, s2)
@@ -69,8 +80,17 @@ class FunSetSuite extends munit.FunSuite {
     }
   }
 
+  test("intersect contains only elements from both sets") {
+    new TestSets {
+      val intersection = intersect(s4, s5)
+      assert(contains(intersection, 3))
+      assert(!contains(intersection, 2))
+      assert(!contains(intersection, 4))
+    }
+  }
 
 
   import scala.concurrent.duration._
+
   override val munitTimeout = 10.seconds
 }
