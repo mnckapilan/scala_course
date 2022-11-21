@@ -64,7 +64,6 @@ class TweetSetSuite extends munit.FunSuite {
     }
   }
 
-
   import scala.concurrent.duration._
   override val munitTimeout = 10.seconds
 }
