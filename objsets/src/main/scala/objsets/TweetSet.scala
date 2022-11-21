@@ -141,21 +141,29 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
   def union(that: TweetSet): TweetSet = left.union(right.union(that)).incl(elem)
 
-  //  def mostRetweeted: Tweet = {
-  //      if (left.isInstanceOf[Empty] && right.isInstanceOf[Empty]) elem
-  //      else if (left.isInstanceOf[Empty]) right.mostRetweeted
-  //      else if (right.isInstanceOf[Empty]) left.mostRetweeted
-  //      else if (left.mostRetweeted.retweets > right.mostRetweeted.retweets) left.mostRetweeted else right.mostRetweeted
-  //  }
+  //    def mostRetweeted: Tweet = {
+  //        if (left.isInstanceOf[Empty] && right.isInstanceOf[Empty]) elem
+  //        else if (left.isInstanceOf[Empty]) right.mostRetweeted
+  //        else if (right.isInstanceOf[Empty]) left.mostRetweeted
+  //        else if (left.mostRetweeted.retweets > right.mostRetweeted.retweets) left.mostRetweeted else right.mostRetweeted
+  //    }
 
   def mostRetweeted: Tweet = {
     left match {
       case _: Empty if right.isInstanceOf[Empty] => elem
       case _: Empty => List(right.mostRetweeted, elem).maxBy(_.retweets)
-      case _ => right match {
-        case _: Empty => List(left.mostRetweeted, elem).maxBy(_.retweets)
-        case _ => List(left.mostRetweeted, elem, right.mostRetweeted).maxBy(_.retweets)
-      }
+      case _ =>
+        right match {
+          case _: Empty => List(left.mostRetweeted, elem).maxBy(_.retweets)
+          case _ => List(left.mostRetweeted, elem, right.mostRetweeted).maxBy(_.retweets)
+        }
+    }
+  }
+
+  def anotherOne: Tweet = {
+    (left, right) match {
+      case left.isInstanceOf[Empty] | right.isInstanceOf[Empty] => elem
+
     }
   }
 
