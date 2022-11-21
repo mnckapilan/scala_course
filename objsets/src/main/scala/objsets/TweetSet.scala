@@ -105,6 +105,8 @@ abstract class TweetSet extends TweetSetInterface {
    * This method takes a function and applies it to every element in the set.
    */
   def foreach(f: Tweet => Unit): Unit
+
+  def isEmpty: Boolean
 }
 
 class Empty extends TweetSet {
@@ -129,10 +131,14 @@ class Empty extends TweetSet {
   def remove(tweet: Tweet): TweetSet = throw new NoSuchElementException
 
   def foreach(f: Tweet => Unit): Unit = ()
+
+  def isEmpty: Boolean = true
 }
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
+
+  def isEmpty: Boolean = false
 
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
     if (p(this.elem)) left.filterAcc(p, right.filterAcc(p, acc.incl(elem)))
@@ -141,32 +147,16 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
   def union(that: TweetSet): TweetSet = left.union(right.union(that)).incl(elem)
 
-  //    def mostRetweeted: Tweet = {
-  //        if (left.isInstanceOf[Empty] && right.isInstanceOf[Empty]) elem
-  //        else if (left.isInstanceOf[Empty]) right.mostRetweeted
-  //        else if (right.isInstanceOf[Empty]) left.mostRetweeted
-  //        else if (left.mostRetweeted.retweets > right.mostRetweeted.retweets) left.mostRetweeted else right.mostRetweeted
-  //    }
-
   def mostRetweeted: Tweet = {
-    left match {
-      case _: Empty if right.isInstanceOf[Empty] => elem
-      case _: Empty => List(right.mostRetweeted, elem).maxBy(_.retweets)
-      case _ =>
-        right match {
-          case _: Empty => List(left.mostRetweeted, elem).maxBy(_.retweets)
-          case _ => List(left.mostRetweeted, elem, right.mostRetweeted).maxBy(_.retweets)
-        }
-    }
+    if (left.isEmpty && right.isEmpty) elem
+    else if (left.isEmpty) greaterTweet(right.mostRetweeted, elem)
+    else if (right.isEmpty) greaterTweet(left.mostRetweeted, elem)
+    else greaterTweet(greaterTweet(left.mostRetweeted, elem), right.mostRetweeted)
   }
 
-  def anotherOne: Tweet = {
-    (left, right) match {
-      case left.isInstanceOf[Empty] | right.isInstanceOf[Empty] => elem
-
-    }
+  def greaterTweet(a: Tweet, b: Tweet): Tweet = {
+    if (a.retweets > b.retweets) a else b
   }
-
 
   def descendingByRetweet: TweetList = {
     new Cons(mostRetweeted, remove(mostRetweeted).descendingByRetweet)
