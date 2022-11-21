@@ -148,11 +148,14 @@ class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
   def union(that: TweetSet): TweetSet = left.union(right.union(that)).incl(elem)
 
   def mostRetweeted: Tweet = {
-    if (left.isEmpty && right.isEmpty) elem
-    else if (left.isEmpty) greaterTweet(right.mostRetweeted, elem)
-    else if (right.isEmpty) greaterTweet(left.mostRetweeted, elem)
-    else greaterTweet(greaterTweet(left.mostRetweeted, elem), right.mostRetweeted)
+    (left, right) match {
+      case (_: Empty, _: Empty) => elem
+      case (_: Empty, right) => greaterTweet(right.mostRetweeted, elem)
+      case (left: Empty, _) => greaterTweet(left.mostRetweeted, elem)
+      case _ => greaterTweet(greaterTweet(left.mostRetweeted, elem), right.mostRetweeted)
+    }
   }
+
 
   def greaterTweet(a: Tweet, b: Tweet): Tweet = {
     if (a.retweets > b.retweets) a else b
