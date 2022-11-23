@@ -1,5 +1,8 @@
 package patmat
 
+import scala.::
+import scala.annotation.tailrec
+
 /**
  * A huffman code is represented by a binary tree.
  *
@@ -32,12 +35,12 @@ trait Huffman extends HuffmanInterface {
 
   def chars(tree: CodeTree): List[Char] = {
     tree match {
-      case Fork(left, right, chars, _) => this.chars(left) :: this.chars(right)
+      case Fork(left, right, chars, _) => this.chars(left) ::: this.chars(right)
       case Leaf(char, _) => List(char)
     }
   }
 
-  def makeCodeTree(left: CodeTree, right: CodeTree) =
+  def makeCodeTree(left: CodeTree, right: CodeTree): Fork =
     Fork(left, right, chars(left) ::: chars(right), weight(left) + weight(right))
 
   // Part 2: Generating Huffman trees
@@ -76,7 +79,24 @@ trait Huffman extends HuffmanInterface {
    * println("integer is  : "+ theInt)
    * }
    */
-  def times(chars: List[Char]): List[(Char, Int)] = ???
+  def times(chars: List[Char]): List[(Char, Int)] = {
+    @tailrec
+    def retrievePair(result: List[(Char, Int)], head: Char): (Char, Int) = {
+      if (result.head._1 == head) result.head
+      else retrievePair(result.tail, head)
+    }
+
+    @tailrec
+    def timesAcc(chars: List[Char], acc: List[(Char, Int)]): List[(Char, Int)] = {
+      if (chars.isEmpty) acc
+      else retrievePair(acc, chars.head) match {
+        case (char, counter) => timesAcc(chars.tail, (char, counter + 1) :: acc.filterNot(p => p._1 == char))
+        case _ => timesAcc(chars.tail, (chars.head, 1) :: acc)
+      }
+    }
+
+    timesAcc(chars, List.empty)
+  }
 
   /**
    * Returns a list of `Leaf` nodes for a given frequency table `freqs`.
@@ -85,12 +105,14 @@ trait Huffman extends HuffmanInterface {
    * head of the list should have the smallest weight), where the weight
    * of a leaf is the frequency of the character.
    */
-  def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = ???
+  def makeOrderedLeafList(freqs: List[(Char, Int)]): List[Leaf] = {
+    freqs.map(e => Leaf(e._1, e._2)).sortBy(_.weight)
+  }
 
   /**
    * Checks whether the list `trees` contains only one single code tree.
    */
-  def singleton(trees: List[CodeTree]): Boolean = ???
+  def singleton(trees: List[CodeTree]): Boolean = trees.size == 1
 
   /**
    * The parameter `trees` of this function is a list of code trees ordered
@@ -104,7 +126,10 @@ trait Huffman extends HuffmanInterface {
    * If `trees` is a list of less than two elements, that list should be returned
    * unchanged.
    */
-  def combine(trees: List[CodeTree]): List[CodeTree] = ???
+  def combine(trees: List[CodeTree]): List[CodeTree] = trees match {
+    case first :: second :: tail => (makeCodeTree(first, second) :: tail).sortWith((a, b) => weight(a) < weight(b))
+    case _ => trees
+  }
 
   /**
    * This function will be called in the following way:
